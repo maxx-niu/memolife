@@ -16,11 +16,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 
-function LoginForm() {
+function SignupForm() {
   const [error, setError] = useState("");
   const router = useRouter();
 
-  const handleLogin = async (formData: FormData) => {
+  const handleSignup = async (formData: FormData) => {
     setError("");
 
     const email = formData.get("email") as string | null;
@@ -31,12 +31,12 @@ function LoginForm() {
       return;
     }
 
-    const res = await fetch("/api/login", {
+    const res = await fetch("/api/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email: formData.get("email"),
-        password: formData.get("password"),
+        email,
+        password,
       }),
     });
 
@@ -51,17 +51,17 @@ function LoginForm() {
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>
-        <CardTitle>Login to your Memolife account</CardTitle>
+        <CardTitle>Create a Memolife account</CardTitle>
         <CardDescription>
-          Enter your email below to login to your account
+          Enter your details below to create your account
         </CardDescription>
         <CardAction>
           <Button variant="link">
-            <Link href="/signup">Sign Up</Link>
+            <Link href="/login">Login</Link>
           </Button>
         </CardAction>
       </CardHeader>
-      <form action={handleLogin}>
+      <form action={handleSignup}>
         <CardContent>
           <div className="flex flex-col gap-6">
             <div className="grid gap-2">
@@ -78,12 +78,21 @@ function LoginForm() {
               <Label htmlFor="password">Password</Label>
               <Input id="password" name="password" type="password" required />
             </div>
+            <div className="grid gap-2">
+              <Label htmlFor="confirm-password">Confirm Password</Label>
+              <Input
+                id="confirm-password"
+                name="confirm-password"
+                type="password"
+                required
+              />
+            </div>
             {error && <p className="text-sm text-red-500">{error}</p>}
           </div>
         </CardContent>
         <CardFooter className="flex-col gap-2">
           <Button type="submit" className="w-full">
-            Login
+            Sign Up
           </Button>
         </CardFooter>
       </form>
@@ -91,4 +100,4 @@ function LoginForm() {
   );
 }
 
-export default LoginForm;
+export default SignupForm;
