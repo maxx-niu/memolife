@@ -31,3 +31,13 @@ To stop Supabase, run the following command:
 ```bash
 npx supabase stop --no-backup
 ```
+
+(Note if Supabase CLI is installed, you can run the commands above without the `npx` prefix.)
+
+## Supabase development workflow
+
+1. Make schema changes locally (create tables, add RLS policies, etc.)
+2. Run `supabase db diff -f describe_the_change` to generate a migration file
+3. Test locally with `supabase db reset` (replays all migrations from scratch)
+4. Run `supabase db push` to apply pending migrations to production
+5. Commit the migration files to git
