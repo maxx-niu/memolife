@@ -20,10 +20,9 @@ For local development, you need to have Supabase running. Run the following comm
 
 First, ensure Docker Desktop is installed and running.
 
-Then, run the following command to initialize and start Supabase:
+Then, run the following command to start Supabase:
 
 ```bash
-npx supabase init
 npx supabase start
 ```
 
