@@ -44,7 +44,7 @@ function SignupForm() {
     if (data.error) {
       setError(data.error);
     } else {
-      router.push("/");
+      router.push("/check-email");
     }
   };
 
