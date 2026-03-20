@@ -30,7 +30,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 To stop Supabase when you're done:
 
 ```bash
-npx supabase stop --no-backup
+npx supabase stop
 ```
 
 ## Supabase development workflow
