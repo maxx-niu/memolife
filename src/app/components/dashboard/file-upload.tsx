@@ -3,6 +3,7 @@
 import { useRef, useState, type ChangeEvent } from "react";
 import { FileUp, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 const ALLOWED_EXTENSIONS = new Set([".pdf", ".txt", ".md"]);
 
@@ -13,7 +14,15 @@ function isAllowedFile(file: File): boolean {
   return ALLOWED_EXTENSIONS.has(lower.slice(dot));
 }
 
+/**
+ * FileUpload is a component that allows the user to upload a file to the dashboard.
+ * It uses the upload API route to upload the file to the database.
+ * It also automatically reloads server components to show the new document.
+ * @returns A form that allows the user to upload a file to the dashboard.
+ */
+
 export default function FileUpload() {
+  const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const [selected, setSelected] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
@@ -71,6 +80,7 @@ export default function FileUpload() {
       }
 
       setMessage("Document saved.");
+      router.refresh(); // Refresh the dashboard page to show the new document
       setSelected(null);
       if (inputRef.current) inputRef.current.value = "";
     } catch {
