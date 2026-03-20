@@ -7,8 +7,6 @@ type UploadRequest = {
   file_path: string;
 };
 
-const ALLOWED_EXTENSIONS = new Set([".pdf", ".txt", ".md"]);
-
 export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => null);
@@ -16,12 +14,6 @@ export async function POST(request: Request) {
     if (!file || !file_name || !file_type || !file_path) {
       return Response.json(
         { error: "File, file name, file type, and file path are required" },
-        { status: 400 },
-      );
-    }
-    if (!ALLOWED_EXTENSIONS.has(file_type)) {
-      return Response.json(
-        { error: "File type not supported" },
         { status: 400 },
       );
     }
