@@ -1,3 +1,4 @@
+import FileUpload from "@/app/components/dashboard/file-upload";
 import SearchBar from "@/app/components/dashboard/search-bar";
 
 export default function DashboardPage() {
@@ -12,6 +13,7 @@ export default function DashboardPage() {
         </p>
       </div>
       <SearchBar />
+      <FileUpload />
     </div>
   );
 }
