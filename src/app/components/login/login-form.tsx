@@ -44,7 +44,7 @@ function LoginForm() {
     if (data.error) {
       setError(data.error);
     } else {
-      router.push("/");
+      router.push("/dashboard");
     }
   };
 
