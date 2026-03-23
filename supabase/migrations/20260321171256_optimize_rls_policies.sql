@@ -40,3 +40,7 @@ using (( SELECT (auth.uid() = documents.user_id)));
   for update
   to public
 using (( SELECT (auth.uid() = documents.user_id)));
+
+-- Restrict updates to only the status column
+revoke update on table "public"."documents" from "authenticated";
+grant update (status) on table "public"."documents" to "authenticated";
