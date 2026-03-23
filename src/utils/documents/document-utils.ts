@@ -1,4 +1,11 @@
-import { PDFParse } from "pdf-parse";
+import { getDocument, GlobalWorkerOptions } from "pdfjs-dist/legacy/build/pdf.mjs";
+import OpenAI from "openai";
+
+// Point to the actual worker file for Node.js
+GlobalWorkerOptions.workerSrc = new URL(
+  "pdfjs-dist/legacy/build/pdf.worker.mjs",
+  import.meta.url,
+).toString();
 
 const SEPARATORS = ["\n\n", "\n", ". ", " "];
 
@@ -6,13 +13,25 @@ export async function extractText(
   buffer: Buffer,
   fileType: string,
 ): Promise<string> {
-  if (fileType === "pdf") {
-    const parser = new PDFParse(buffer);
-    const result = await parser.getText();
-    return result.text;
+  let text: string;
+  if (fileType === "pdf" || fileType === "application/pdf") {
+    const pdf = await getDocument({ data: new Uint8Array(buffer) }).promise;
+    const pages: string[] = [];
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      pages.push(
+        content.items
+          .filter((item) => "str" in item)
+          .map((item) => (item as { str: string }).str)
+          .join(" "),
+      );
+    }
+    text = pages.join("\n\n");
+  } else {
+    text = buffer.toString("utf-8");
   }
-  // txt, md — already plain text
-  return buffer.toString("utf-8");
+  return text.replace(/\0/g, "");
 }
 
 export function chunkText(
@@ -77,4 +96,24 @@ function splitRecursive(
   }
 
   if (current) chunks.push(current);
+}
+
+const EMBEDDING_BATCH_SIZE = 100;
+
+export async function generateEmbeddings(texts: string[]): Promise<number[][]> {
+  const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+
+  const embeddings: number[][] = [];
+  for (let i = 0; i < texts.length; i += EMBEDDING_BATCH_SIZE) {
+    const batch = texts.slice(i, i + EMBEDDING_BATCH_SIZE);
+    const result = await openai.embeddings.create({
+      model: "text-embedding-3-small",
+      input: batch,
+    });
+    embeddings.push(...result.data.map((d) => d.embedding));
+  }
+
+  return embeddings;
 }

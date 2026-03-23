@@ -52,7 +52,9 @@ export default function FileUpload() {
     }
     if (!isAllowedFile(file)) {
       setSelected(null);
-      setError(`Only ${Object.keys(EXTENSION_MIME).join(", ")} files are supported.`);
+      setError(
+        `Only ${Object.keys(EXTENSION_MIME).join(", ")} files are supported.`,
+      );
       e.target.value = "";
       return;
     }
@@ -77,6 +79,7 @@ export default function FileUpload() {
       }
 
       const file_path = `${user.id}/${selected.name}`;
+
       const formData = new FormData();
       formData.append("file", selected);
       formData.append("file_name", selected.name);
@@ -102,8 +105,10 @@ export default function FileUpload() {
       router.refresh(); // Refresh the dashboard page to show the new document
       setSelected(null);
       if (inputRef.current) inputRef.current.value = "";
-    } catch {
-      setError("Something went wrong. Please try again.");
+    } catch (error) {
+      setError(
+        "Something went wrong. Please try again. " + (error as Error).message,
+      );
     } finally {
       setLoading(false);
     }

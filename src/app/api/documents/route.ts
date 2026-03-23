@@ -1,4 +1,9 @@
 import { createClient } from "@/utils/supabase/server";
+import {
+  extractText,
+  chunkText,
+  generateEmbeddings,
+} from "@/utils/documents/document-utils";
 
 export async function POST(request: Request) {
   try {
@@ -30,6 +35,14 @@ export async function POST(request: Request) {
     }
     const user_id = user.id;
 
+    // Extract text, chunk, and embed before persisting anything
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const text = await extractText(buffer, file_type);
+    const chunks = chunkText(text);
+    const embeddings = await generateEmbeddings(
+      chunks.map((c) => c.content),
+    );
+
     // Insert the document into the database
     const { data: insertData, error: insertError } = await supabase
       .from("documents")
@@ -52,20 +65,39 @@ export async function POST(request: Request) {
       );
     }
 
-    // Upload the file to the Supabase storage
+    // Upload the file to Supabase storage
     const { error: uploadError } = await supabase.storage
       .from("documents")
       .upload(file_path, file);
 
     if (uploadError) {
-      await supabase
-        .from("documents")
-        .update({ status: "failed" })
-        .eq("id", insertData.id);
+      await supabase.from("documents").delete().eq("id", insertData.id);
       return Response.json(
         {
           error: "Failed to upload document to storage: " + uploadError.message,
         },
+        { status: 500 },
+      );
+    }
+
+    // Insert chunks into the database
+    const chunkRows = chunks.map((chunk, i) => ({
+      document_id: insertData.id,
+      user_id,
+      content: chunk.content,
+      chunk_index: chunk.chunkIndex,
+      embedding: JSON.stringify(embeddings[i]),
+    }));
+
+    const { error: chunkError } = await supabase
+      .from("chunks")
+      .insert(chunkRows);
+
+    if (chunkError) {
+      await supabase.storage.from("documents").remove([file_path]);
+      await supabase.from("documents").delete().eq("id", insertData.id);
+      return Response.json(
+        { error: "Failed to store chunks: " + chunkError.message },
         { status: 500 },
       );
     }
@@ -75,7 +107,10 @@ export async function POST(request: Request) {
       .update({ status: "ready" })
       .eq("id", insertData.id);
     return Response.json({ success: true });
-  } catch {
-    return Response.json({ error: "Something went wrong" }, { status: 500 });
+  } catch (err) {
+    return Response.json(
+      { error: "Failed to process document: " + (err as Error).message },
+      { status: 500 },
+    );
   }
 }
