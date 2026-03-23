@@ -44,7 +44,7 @@ function DocumentRow({ doc }: { doc: Document }) {
 }
 
 /**
- * FileList is a component that displays the list of documents that belong to the current user in the dashboard.
+ * FileList is a (server) component that displays the list of documents that belong to the current user in the dashboard.
  * @returns A list of documents.
  */
 

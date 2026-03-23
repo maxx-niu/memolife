@@ -4,14 +4,25 @@ import { useRef, useState, type ChangeEvent } from "react";
 import { FileUp, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/utils/supabase/client";
 
-const ALLOWED_EXTENSIONS = new Set([".pdf", ".txt", ".md"]);
+const EXTENSION_MIME: Record<string, string> = {
+  ".pdf": "application/pdf",
+  ".txt": "text/plain",
+  ".md": "text/markdown",
+};
+
+function getExtension(name: string): string {
+  const dot = name.toLowerCase().lastIndexOf(".");
+  return dot === -1 ? "" : name.toLowerCase().slice(dot);
+}
 
 function isAllowedFile(file: File): boolean {
-  const lower = file.name.toLowerCase();
-  const dot = lower.lastIndexOf(".");
-  if (dot === -1) return false;
-  return ALLOWED_EXTENSIONS.has(lower.slice(dot));
+  return getExtension(file.name) in EXTENSION_MIME;
+}
+
+function getMimeType(file: File): string {
+  return EXTENSION_MIME[getExtension(file.name)] ?? "application/octet-stream";
 }
 
 /**
@@ -41,7 +52,7 @@ export default function FileUpload() {
     }
     if (!isAllowedFile(file)) {
       setSelected(null);
-      setError("Only .pdf, .txt, and .md files are supported.");
+      setError(`Only ${Object.keys(EXTENSION_MIME).join(", ")} files are supported.`);
       e.target.value = "";
       return;
     }
@@ -55,18 +66,26 @@ export default function FileUpload() {
     setError(null);
     setMessage(null);
 
-    const file_path = `pending/${crypto.randomUUID()}/${selected.name}`;
-
     try {
-      const res = await fetch("/api/documents/upload", {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        setError("User not found.");
+        return;
+      }
+
+      const file_path = `${user.id}/${selected.name}`;
+      const formData = new FormData();
+      formData.append("file", selected);
+      formData.append("file_name", selected.name);
+      formData.append("file_type", getMimeType(selected));
+      formData.append("file_path", file_path);
+
+      const res = await fetch("/api/documents", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          file: selected,
-          file_name: selected.name,
-          file_type: selected.type,
-          file_path,
-        }),
+        body: formData,
       });
 
       const data = (await res.json().catch(() => ({}))) as {

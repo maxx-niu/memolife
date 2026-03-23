@@ -92,3 +92,11 @@ using ((auth.uid() = user_id));
 
 
 
+  create policy "Users can update own documents"
+  on "public"."documents"
+  as permissive
+  for update
+  to public
+using ((auth.uid() = user_id));
+
+alter publication supabase_realtime add table documents;

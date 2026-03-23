@@ -1,4 +1,7 @@
-
+insert into storage.buckets (id, name, public)
+values ('documents', 'documents', false);
+  
+  
   create policy "Enable users to view their own data only"
   on "storage"."objects"
   as permissive
