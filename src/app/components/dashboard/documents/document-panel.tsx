@@ -61,7 +61,7 @@ function DocumentContent({
     );
   }
   return (
-    <pre className="flex-1 overflow-auto rounded-md border bg-muted/40 p-4 text-xs leading-relaxed whitespace-pre-wrap break-words font-mono">
+    <pre className="flex-1 overflow-auto rounded-md border bg-muted/40 p-4 text-xs leading-relaxed whitespace-pre-wrap wrap-break-words font-mono">
       {state.content}
     </pre>
   );
