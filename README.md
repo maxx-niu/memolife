@@ -1,5 +1,5 @@
 Application Overview:
-MemoLife is a Retrieval-Augmented Generation (RAG) application designed to ingest, query, and index personal documents (PDFs, files, notes, etc.). It is designed to provide answers to users based strictly on their uploaded data.
+MemoLife is a Retrieval-Augmented Generation (RAG) application designed to ingest, query, and index personal documents (Currently supporting PDFs, TXT, and MD files). It is designed to provide answers to users based strictly on their uploaded data.
 
 Functional Requirements:
 File support: the app should support .pdf, .txt, and .md files
