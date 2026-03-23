@@ -1,6 +1,6 @@
-import FileUpload from "@/app/components/dashboard/file-upload";
+import FileUpload from "@/app/components/dashboard/documents/file-upload";
 import SearchBar from "@/app/components/dashboard/search-bar";
-import FileList from "@/app/components/dashboard/file-list";
+import FileList from "@/app/components/dashboard/documents/file-list";
 
 export default function DashboardPage() {
   return (
